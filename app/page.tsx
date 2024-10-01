@@ -1,21 +1,34 @@
-"use client"
+"use client";
 
-import { PCBViewer } from "@tscircuit/pcb-viewer"
-import { useState } from "react"
-import { useQuery } from "react-query"
-import { useDebounce } from "use-debounce"
+import { PCBViewer } from "@tscircuit/pcb-viewer";
+import { useState } from "react";
+import { useQuery } from "react-query";
+import { useDebounce } from "use-debounce";
+import FootprintComponent from "../components/FootprintComponent";
+
+type Data = {
+  text_input: string;
+  footprinter_input: string;
+  soup: any;
+  error: {
+    message: string;
+  };
+};
 
 export default () => {
   const [textInput, setTextInput] = useState(
     "a qfp component with 24 pins and 0.8mm pitch and a thermal pad"
-  )
-  const [delayedInput] = useDebounce(textInput, 400)
-  const { data } = useQuery(["/generation/get", delayedInput], async () => {
-    const res = await fetch(
-      `/api/generation/get?text=${encodeURIComponent(delayedInput)}`
-    )
-    return res.json()
-  })
+  );
+  const [delayedInput] = useDebounce(textInput, 400);
+  const { data } = useQuery<Data>(
+    ["/generation/get", delayedInput],
+    async () => {
+      const res = await fetch(
+        `/api/generation/get?text=${encodeURIComponent(delayedInput)}`
+      );
+      return res.json();
+    }
+  );
 
   return (
     <div
@@ -64,7 +77,7 @@ export default () => {
             <div
               style={{ cursor: "pointer", color: "blue" }}
               onClick={() => {
-                setTextInput("a 16 pin wide dip component")
+                setTextInput("a 16 pin wide dip component");
               }}
             >
               example1
@@ -72,7 +85,7 @@ export default () => {
             <div
               style={{ cursor: "pointer", color: "blue" }}
               onClick={() => {
-                setTextInput("72 pin square bga component")
+                setTextInput("72 pin square bga component");
               }}
             >
               example2
@@ -82,7 +95,7 @@ export default () => {
               onClick={() => {
                 setTextInput(
                   "a qfn component with 24 pins and 0.8mm pitch and a thermal pad, pins are counter clockwise starting from the top right corner"
-                )
+                );
               }}
             >
               example3
@@ -154,14 +167,7 @@ export default () => {
           onChange={(e) => setTextInput(e.target.value)}
         />
         <div style={{ color: "red" }}>{data?.error?.message}</div>
-        <div
-          style={{
-            color: "gray",
-            fontFamily: "monospace",
-            whiteSpace: "pre",
-            paddingTop: 4,
-          }}
-        >{`// paste into tscircuit\n<component footprint="${data?.footprinter_input}" />`}</div>
+        <FootprintComponent data={data?.footprinter_input} />
       </div>
       <div style={{ height: 600, width: "100%", marginTop: 40 }}>
         {data && data.text_input === textInput && (
@@ -173,5 +179,5 @@ export default () => {
         )}
       </div>
     </div>
-  )
-}
+  );
+};
